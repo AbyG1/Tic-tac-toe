@@ -10,25 +10,47 @@ const gameBoard = (function(){
                 ]
 
   const showBoard = () => {
-    board.forEach(row => console.log(row))
-  }
+    board.forEach(row => {
+      console.log(row.join(' | ')) 
+      console.log('---------')
+    })
+  } 
+      
+
 
   const updateBoard = (row,column,marker) => {
-      board[row][column] = marker
+    if (board[row][column] === '') {
+      board[row][column] = marker;
+      return true; // Indicate successful update
+    } else {
+      return false; // Cell already occupied
+    }
+
   }
+
+  
+
   return {showBoard,updateBoard}
 })()
 
 
 
 //player object ot create players
-function player(playerName,playerMarker){
+function player(playerName,playerMarker,playerId){
   const name = playerName
   const marker = playerMarker
+  const id = playerId // for identifying player for certain situations eg: to prevent insertion into the same cell
   let score = 0
   const updateScore = () => score++
   const getScore = () => score
-  return {name,marker,getScore,updateScore}
+  const getMarker = () => marker
+  const getName = () => name
+  let turn = 0
+  const updateTurn = () => turn++
+  const getTurn = () => turn
+  const resetTurn = () => turn = 0
+  const getId = () => id
+  return {getName,getScore,updateScore,getMarker,updateTurn,getTurn,resetTurn,getId}
 }
 
 
@@ -67,39 +89,69 @@ function getPlayerInput(){
    
 }
 
+
 function createPlayers(name1,name2,marker1,marker2){
-    const player1 = player(name1,marker1)
-    const player2 = player(name2,marker2)
+    const player1 = player(name1,marker1,1)// create id for accessing differnet situation
+    const player2 = player(name2,marker2,2)
     return {player1,player2}
 
 }
 
 
-function playRound(player1,player2){
-  alert('Round 1')
+function playRound(...players){
+  
 
-  let row = ''
-  while(row !== 1 && row !== 2 && row !== 3){
-    row = parseInt(prompt('Enter row number')) 
-    if(row !== 1 && row !== 2 && row !== 3){
-      alert("Enter a number 1 - 2 - 3")
-    }
-  }
-  
-  let column = ''
-  while(column !== 1 && column !== 2 && column !== 3){
-    column = parseInt(prompt('Enter column number')) 
-    if(column !== 1 && column !== 2 && column !== 3){
-      alert("Enter a number 1 - 2 - 3")
-    }
-  }
-  
-  row--
-  column--
-  gameBoard.updateBoard(row,column)
-  gameBoard.showBoard()
-  
+
+    players.forEach(player => {
+
+      let isMoveValid = false;
+      do {
+      player.updateTurn()
+      console.log(`Round ${player.getTurn()}: ${player.getName()}'s turn`)
+      let row = ''
+      let column = ''
+
+      while(row !== 1 && row !== 2 && row !== 3){
+        row = parseInt(prompt(`${player.getName()}, Enter row number: 1 2 3`)) 
+        if(row !== 1 && row !== 2 && row !== 3){
+          alert(`${player.getName()}, Enter a number 1 - 2 - 3`)
+        }
+       
+      }
+      
+      
+      while(column !== 1 && column !== 2 && column !== 3){
+        column = parseInt(prompt(`${player.getName()}, Enter column number 1 2 3`)) 
+        if(column !== 1 && column !== 2 && column !== 3){
+          alert(`${player.getName()}, Enter a number 1 - 2 - 3`)
+        }
+        
+      }
+      
+      row--
+      column--
+
+      isMoveValid = gameBoard.updateBoard(row, column, player.getMarker());
+      if (!isMoveValid) {
+        alert("That cell is already taken! Please choose another one.");
+        player.resetTurn()
+      }
+      } while (!isMoveValid) // Repeat if the cell is taken
+
+      gameBoard.showBoard()
+
+    
+    })
+    
+
+    
+
 }
+
+          
+
+  
+
 
 
 //gameFlow controls the game
