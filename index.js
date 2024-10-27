@@ -28,9 +28,11 @@ const gameBoard = (function(){
 
   }
 
+  const getBoard = () => board
+
   
 
-  return {showBoard,updateBoard}
+  return {showBoard,updateBoard,getBoard}
 })()
 
 
@@ -39,18 +41,18 @@ const gameBoard = (function(){
 function player(playerName,playerMarker,playerId){
   const name = playerName
   const marker = playerMarker
-  const id = playerId // for identifying player for certain situations eg: to prevent insertion into the same cell
+  const id = playerId // for identifying player for certain situations eg: to check win conditions at certain turns
   let score = 0
   const updateScore = () => score++
   const getScore = () => score
   const getMarker = () => marker
   const getName = () => name
   let turn = 0
-  const updateTurn = () => turn++
+  const increaseTurnCount = () => turn++
   const getTurn = () => turn
-  const resetTurn = () => turn = 0
+  const decreaseTurnCount = () => turn--
   const getId = () => id
-  return {getName,getScore,updateScore,getMarker,updateTurn,getTurn,resetTurn,getId}
+  return {getName,getScore,updateScore,getMarker,increaseTurnCount,getTurn,decreaseTurnCount,getId}
 }
 
 
@@ -98,15 +100,15 @@ function createPlayers(name1,name2,marker1,marker2){
 }
 
 
-function playRound(...players){
+function playSingleRound(player){
   
 
 
-    players.forEach(player => {
+    
 
       let isMoveValid = false;
       do {
-      player.updateTurn()
+      player.increaseTurnCount()
       console.log(`Round ${player.getTurn()}: ${player.getName()}'s turn`)
       let row = ''
       let column = ''
@@ -134,23 +136,86 @@ function playRound(...players){
       isMoveValid = gameBoard.updateBoard(row, column, player.getMarker());
       if (!isMoveValid) {
         alert("That cell is already taken! Please choose another one.");
-        player.resetTurn()
+        player.decreaseTurnCount()
       }
       } while (!isMoveValid) // Repeat if the cell is taken
 
       gameBoard.showBoard()
 
     
-    })
+  
     
 
     
 
 }
 
+function checkwinCondition(marker){
+  if(q){
+
+  }
+}
+  
+
+function playAllRounds(player1, player2) {
+  for (let i = 0; i < 4; i++) {
+    // Player 1's turn
+    playSingleRound(player1);
+    if (player1.getTurn() >= 3) {
+      if (checkwinCondition(player1.getMarker())) {
+        console.log(`${player1.getName()} wins!`);
+        return; // Exit the function if player 1 wins
+      }
+    }
+
+    // Player 2's turn
+    playSingleRound(player2);
+    if (player2.getTurn() >= 3) {
+      if (checkwinCondition(player2.getMarker())) {
+        console.log(`${player2.getName()} wins!`);
+        return; // Exit the function if player 2 wins
+      }
+    }
+  }
+
+  // After 4 rounds, check if the game is a draw
+  console.log("The game is a draw!");
+}
+
+
+function checkwinCondition(marker){
+  const board = gameBoard.getBoard()
+  
+  
+    // Check rows
+    for (let i = 0; i < 3; i++) {
+      if (board[i][0] === marker && board[i][1] === marker && board[i][2] === marker) {
+        return true;
+      }
+    }
+  
+    // Check columns
+    for (let i = 0; i < 3; i++) {
+      if (board[0][i] === marker && board[1][i] === marker && board[2][i] === marker) {
+        return true;
+      }
+    }
+  
+    // Check diagonals
+    if (
+      (board[0][0] === marker && board[1][1] === marker && board[2][2] === marker) || 
+      (board[0][2] === marker && board[1][1] === marker && board[2][0] === marker)
+    ) {
+      return true;
+    }
+  
+    // No win condition met
+    return false;
+  }
+  
+
           
 
-  
 
 
 
@@ -158,7 +223,7 @@ function playRound(...players){
 function gameFlow(){
   const {name1,name2,marker1,marker2} = getPlayerInput()
   const {player1,player2} = createPlayers(name1,name2,marker1,marker2)
-  playRound(player1,player2)
+  playAllRounds(player1,player2)
   
 }
 
