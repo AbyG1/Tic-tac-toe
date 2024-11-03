@@ -23,4 +23,19 @@
     background:#274c43;
     color: white;
     font-family: "Fredericka the Great", serif;
+    text-align: center;
+  }
+
+  button{
+    padding: 20px 30px;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 20px;
+    color:#274c43;
+    background-color: yellowgreen;
+  }
+
+  input{
+    padding: 20px 30px;
+    border-radius: 10px;
   }
