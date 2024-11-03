@@ -9,15 +9,6 @@ const gameBoard = (function(){
                   ['','','']
                 ]
 
-  const showBoard = () => {
-    board.forEach(row => {
-      console.log(row.join(' | ')) 
-      console.log('---------')
-    })
-  } 
-      
-
-
   const updateBoard = (row,column,marker) => {
     if (board[row][column] === '') {
       board[row][column] = marker;
@@ -32,155 +23,51 @@ const gameBoard = (function(){
 
   
 
-  return {showBoard,updateBoard,getBoard}
+  return {updateBoard,getBoard}
 })()
 
 
 
 //player object ot create players
-function player(playerName,playerMarker,playerId){
+function player(playerName,playerMarker){
   const name = playerName
   const marker = playerMarker
-  const id = playerId // for identifying player for certain situations eg: to check win conditions at certain turns
-  let score = 0
-  const updateScore = () => score++
-  const getScore = () => score
   const getMarker = () => marker
   const getName = () => name
   let turn = 0
-  const increaseTurnCount = () => turn++
+  const updateTurn = () => turn++
   const getTurn = () => turn
-  const decreaseTurnCount = () => turn--
-  const getId = () => id
-  return {getName,getScore,updateScore,getMarker,increaseTurnCount,getTurn,decreaseTurnCount,getId}
+  return {getName,getMarker,getTurn,updateTurn}
 }
 
 
 
-function getPlayerInput(){
-  alert("Welcome to the Game, you have to enter your name and choose your marker")
-  let name1 = ''
-  let name2 = ''
-  while(!name1.trim()){
-    name1 = prompt("Enter player1's name:")
-    if(!name1.trim()){
-      alert("Enter a valid name")
-    }
-  } 
-
-  while(!name2.trim()){
-    name2 = prompt("Enter player2's name:")
-    if(!name2.trim()){
-      alert("Enter a valid name")
-    }
-  } 
-
-  let marker1 = ''
-  let marker2 = ''
-
-  while(marker1 !== 'x' && marker1 !== 'o'){
-    marker1 = prompt(`${name1}, choose your marker: 'x' or 'o'`).toLowerCase().trim()
-    if(marker1 !== 'x' && marker1 !== 'o'){
-      alert("Enter either x or o")
-    }
-  }
-
-  marker2 = marker1 === 'x' ? 'o' : 'x'
-
-    return {name1,name2,marker1,marker2}
-   
-}
-
-
-function createPlayers(name1,name2,marker1,marker2){
-    const player1 = player(name1,marker1,1)// create id for accessing differnet situation
-    const player2 = player(name2,marker2,2)
+function createPlayers(name1,name2){
+    const player1 = player(name1,'X')// create id for accessing differnet situation
+    const player2 = player(name2,'O')
     return {player1,player2}
 
 }
 
-
-function playSingleRound(player){
+function getPlayerName() {
+  const name1 = document.getElementById('player1').value.trim();
+  const name2 = document.getElementById('player2').value.trim();
   
-
-
-    
-
-      let isMoveValid = false;
-      do {
-      player.increaseTurnCount()
-      console.log(`Round ${player.getTurn()}: ${player.getName()}'s turn`)
-      let row = ''
-      let column = ''
-
-      while(row !== 1 && row !== 2 && row !== 3){
-        row = parseInt(prompt(`${player.getName()}, Enter row number: 1 2 3`)) 
-        if(row !== 1 && row !== 2 && row !== 3){
-          alert(`${player.getName()}, Enter a number 1 - 2 - 3`)
-        }
-       
-      }
-      
-      
-      while(column !== 1 && column !== 2 && column !== 3){
-        column = parseInt(prompt(`${player.getName()}, Enter column number 1 2 3`)) 
-        if(column !== 1 && column !== 2 && column !== 3){
-          alert(`${player.getName()}, Enter a number 1 - 2 - 3`)
-        }
-        
-      }
-      
-      row--
-      column--
-
-      isMoveValid = gameBoard.updateBoard(row, column, player.getMarker());
-      if (!isMoveValid) {
-        alert("That cell is already taken! Please choose another one.");
-        player.decreaseTurnCount()
-      }
-      } while (!isMoveValid) // Repeat if the cell is taken
-
-      gameBoard.showBoard()
-
-    
-  
-    
-
-    
-
-}
-
-function checkwinCondition(marker){
-  if(q){
-
+  // Check if both names are empty
+  if (!name1 && !name2) {
+      return { name1: undefined, name2: undefined };
   }
+  
+  // Return names, using undefined for any empty name
+  return {
+      name1: name1 || undefined,
+      name2: name2 || undefined
+  };
 }
   
 
-function playAllRounds(player1, player2) {
-  for (let i = 0; i < 4; i++) {
-    // Player 1's turn
-    playSingleRound(player1);
-    if (player1.getTurn() >= 3) {
-      if (checkwinCondition(player1.getMarker())) {
-        console.log(`${player1.getName()} wins!`);
-        return; // Exit the function if player 1 wins
-      }
-    }
 
-    // Player 2's turn
-    playSingleRound(player2);
-    if (player2.getTurn() >= 3) {
-      if (checkwinCondition(player2.getMarker())) {
-        console.log(`${player2.getName()} wins!`);
-        return; // Exit the function if player 2 wins
-      }
-    }
-  }
 
-  // After 4 rounds, check if the game is a draw
-  console.log("The game is a draw!");
-}
 
 
 function checkwinCondition(marker){
@@ -214,21 +101,125 @@ function checkwinCondition(marker){
   }
   
 
-          
 
 
 
+const displayController = (function() {
 
-//gameFlow controls the game
-function gameFlow(){
-  const {name1,name2,marker1,marker2} = getPlayerInput()
-  const {player1,player2} = createPlayers(name1,name2,marker1,marker2)
-  playAllRounds(player1,player2)
+    const containerEle = document.getElementById('container')
+    let gamebox = document.createElement('div')
+   
+    
+    gamebox.setAttribute('id','box')
+    gamebox.classList.add('gamebox')
+
+    const createCells = () => {
+      const allCells = []
+      const board = gameBoard.getBoard().flat()
+      for(let i = 0; i < 9; i++){
+        const cell = document.createElement('div')
+        cell.id = `cell${i}`
+        cell.classList.add('cell')
+        cell.textContent = board[i]
+        allCells.push(cell)
+      }
+        return allCells
+    }
+
+    const displayBoard = () => {
+      gamebox.innerHTML = ''
+      createCells().forEach(cell => 
+        gamebox.appendChild(cell)
+      )
+      containerEle.appendChild(gamebox)
+    }
+
+    
+
+    return {displayBoard}
   
+})()
+
+
+function gameFlow(){
+  const restartBtn = document.getElementById("restart-btn");
+  restartBtn.addEventListener("click", () => {
+    window.location.reload();
+  });
+
+
+
+      
+      const startBtn = document.getElementById('start-btn')
+      startBtn.addEventListener('click',() => {
+          startBtn.disabled = true
+          const { name1, name2 } = getPlayerName();
+          const { player1, player2 } = createPlayers(name1 || 'player-X', name2 || 'player-O');
+          currentPlayer = player1
+          displayController.displayBoard()
+          const displayElement = document.getElementById('display-result')
+          displayElement.textContent = `${currentPlayer.getName()}'s turn`
+
+          const container = document.getElementById('container')
+          container.addEventListener('click', handleCellClick)
+            
+            function handleCellClick(e){
+            if (e.target.classList.contains('cell')) {
+              const id = parseInt(e.target.id.replace('cell', ''), 10);
+              const row = Math.floor(id / 3);
+              const col = id % 3;
+              const gameResult = playRounds(row,col,currentPlayer,displayElement)
+              currentPlayer = currentPlayer === player1 ? player2: player1
+              if(!gameResult)
+              displayElement.textContent = `${currentPlayer.getName()}'s turn`
+              else {
+                displayElement.textContent = gameResult
+                container.removeEventListener('click', handleCellClick)
+              }
+            
+            }
+        
+
+      }
+    
+      
+
+})
+
 }
+
+function playRounds(row,col,player) {
+   
+  const moveStatus = gameBoard.updateBoard(row,col,player.getMarker())
+  if(moveStatus){
+    player.updateTurn()
+    displayController.displayBoard()
+    
+    const gameStatus = checkwinCondition(player.getMarker())
+    
+    if(gameStatus){
+      return `${player.getName()} won`
+    }
+    if(player.getTurn() >= 5){
+      return  `ITs a Draw, play again`
+
+    }
+
+}
+
+
+    return null
+  
+
+
+}
+
 
 
 
 
 gameFlow()
 
+
+
+  

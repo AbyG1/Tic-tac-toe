@@ -1,0 +1,26 @@
+.gamebox {
+    display: grid;
+    grid-template-columns: repeat(3, 100px);
+    grid-template-rows: repeat(3, 100px);
+    gap: 10px;
+    background-color: white;
+    width: 300px;
+    margin: auto;
+  }
+
+  .cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    cursor: pointer;
+    background-color: #274c43;
+    width: 100px;
+   
+  }
+
+  body{
+    background:#274c43;
+    color: white;
+    font-family: "Fredericka the Great", serif;
+  }
